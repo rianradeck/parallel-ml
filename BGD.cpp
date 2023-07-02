@@ -23,7 +23,7 @@ public:
             for(int i = 0;i < n_dim;i++){
                 w[i] = w[i] - lr*gradient[i];
             }
-        }   
+        }
     }
 };
 
