@@ -2,10 +2,13 @@
 #include <utility>
 
 const int NUM_TREADS = 4;
+const int MAXN = 100100;
 
 struct Matrix;
-void multBlock(int block, Matrix *ret, const Matrix &A, const Matrix& B);
+void multBlock(int block, Matrix A, Matrix B);
 std::ostream& operator<<(std::ostream& os, Matrix& o);
+
+double globalDoubleArr[MAXN];
 
 struct Matrix{
 
@@ -19,6 +22,18 @@ struct Matrix{
             for(int j = 0;j < col;j++)
                 matrix[getIndex(i, j)] = init;
     }
+
+    Matrix(const Matrix &o) {
+        row = o.row;
+        col = o.col;
+        size = o.col * o.row;
+        matrix = new double[row * col];
+        for(int i = 0;i < row;i++)
+            for(int j = 0;j < col;j++)
+                matrix[getIndex(i, j)] = o.matrix[getIndex(i, j)];
+    }
+
+    Matrix(){}
 
     ~Matrix(){
         delete[] matrix;
@@ -54,8 +69,6 @@ struct Matrix{
         return ret;
     }
 
-
-
     Matrix operator%(const Matrix& o) const {
         Matrix ret(row, o.col);
         if(col != o.row){
@@ -63,21 +76,14 @@ struct Matrix{
             return ret;
         }
 
-
-        int NUM_TREADS = 4;
         std::thread t[NUM_TREADS];
-
-        for(int i = 0;i < NUM_TREADS;i++){
-            t[i] = std::thread(multBlock, i, &ret, *this, o);
-            cout << "Spawned thread " << i << "\n";
-        }
-        for(int i = 0;i < NUM_TREADS;i++){
-            dbg(i);
+        for(int i = 0;i < NUM_TREADS;i++)
+            t[i] = std::thread(multBlock, i, *this, o);
+        for(int i = 0;i < NUM_TREADS;i++)
             t[i].join();
-            cout << "Joined " << i << "\n";
-        }
 
-        cout << ret << "\n";
+        for(int i = 0;i < ret.size;i++)
+            ret.matrix[i] = globalDoubleArr[i];
         return ret;
     }
 };
@@ -103,19 +109,20 @@ std::istream& operator>>(std::istream& is, Matrix& o)
     return is;
 }
 
-void multBlock(int block, Matrix *ret, const Matrix &A, const Matrix& B){
-
-    int blockSize = (ret->size + NUM_TREADS - 1) / NUM_TREADS;
+void multBlock(int block, Matrix A, Matrix B){
+    int retSize = A.row * B.col;
+    int blockSize = (retSize + NUM_TREADS - 1) / NUM_TREADS;
     int start = block * blockSize;
-    int finish = std::min(start + blockSize, ret->size); 
+    int finish = std::min(start + blockSize, retSize); 
 
     for(int idx = start;idx < finish;idx++){
         int i, j;
-        std::tie(i, j) = ret->getIndex(idx);
+        i = idx / B.col, j = idx % B.col;
 
         double sum = 0;
         for(int k = 0;k < A.col;k++)
             sum += A.getElement(i, k) * B.getElement(k, j);
-        ret->matrix[ret->getIndex(i, j)] = sum;
+
+        globalDoubleArr[i * B.col + j] = sum;
     }
 }
