@@ -2,14 +2,8 @@
 #include <utility>
 #include <omp.h>
 
-const int NUM_TREADS = 4;
-const int MAXN = 100100;
-
 struct Matrix;
-void multBlock(int block, Matrix A, Matrix B);
 std::ostream& operator<<(std::ostream& os, Matrix& o);
-
-double globalDoubleArr[MAXN];
 
 struct Matrix{
 
@@ -82,6 +76,8 @@ struct Matrix{
             return ret;
         }
 
+        omp_set_dynamic(0);
+        omp_set_num_threads(12);
         #pragma omp parallel for
         for(int idx = 0;idx < ret.size;idx++){
             int i, j;
@@ -117,23 +113,4 @@ std::istream& operator>>(std::istream& is, Matrix& o)
         }
     }
     return is;
-}
-
-
-void multBlock(int block, Matrix A, Matrix B){
-    int retSize = A.row * B.col;
-    int blockSize = (retSize + NUM_TREADS - 1) / NUM_TREADS;
-    int start = block * blockSize;
-    int finish = std::min(start + blockSize, retSize); 
-
-    for(int idx = start;idx < finish;idx++){
-        int i, j;
-        i = idx / B.col, j = idx % B.col;
-
-        double sum = 0;
-        for(int k = 0;k < A.col;k++)
-            sum += A.getElement(i, k) * B.getElement(k, j);
-
-        globalDoubleArr[i * B.col + j] = sum;
-    }
 }

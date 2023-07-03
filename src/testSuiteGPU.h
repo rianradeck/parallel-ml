@@ -1,4 +1,4 @@
-#include "LinearRegression.h"
+#include "LinearRegressionGPU.h"
 #include <random>
 #include <iostream>
 #include <chrono>
@@ -9,9 +9,11 @@ auto duration_ = tEnd - tStart;
 
 #define MEASURE_TIME_START tStart = std::chrono::high_resolution_clock::now();
 #define MEASURE_TIME_END tEnd = std::chrono::high_resolution_clock::now(); duration_ = tEnd - tStart; std::cerr << "Measured time in seconds: " << duration_.count() / 1e9 << "\n";
-namespace testSuite
+
+namespace testSuiteGPU
 {
-	void genDataset(size_t n, size_t d, Matrix &outX, std::vector<double> &outY, std::vector<double> &outWeights, double noiseFactor = 0)
+
+	void genDataset(size_t n, size_t d, MatrixGPU &outX, std::vector<double> &outY, std::vector<double> &outWeights, double noiseFactor = 0)
 	{
 		std::random_device rd;
 		std::mt19937 pgen(rd());
@@ -34,54 +36,54 @@ namespace testSuite
 		}
 	}
 
+	bool test(int N, int D){
+		LinearRegressionGPU lGPU;
+		MatrixGPU XGPU(N, D);
+		std::vector<double> yGPU, weightsGPU;
+		genDataset(N, D, XGPU, yGPU, weightsGPU);
+
+		std::cerr << "--- GPU start ---\n";
+		std::cerr << N << " " << D << "\n";
+		MEASURE_TIME_START
+		lGPU.fit(XGPU, yGPU);
+		double mseGPU = lGPU.meanSquaredError(XGPU, yGPU);
+		MEASURE_TIME_END
+		return (mseGPU < 1e-2);
+	}
+
 	bool test1()
 	{
-		LinearRegression l;
-		Matrix X(3, 2);
-		X.setElement(0, 0, 1), X.setElement(0, 1, 1);
-		X.setElement(1, 0, 1), X.setElement(1, 1, 2);
-		X.setElement(2, 0, 2), X.setElement(2, 1, 1);
-		std::vector<double> y = {6, 9, 8};
-		std::cerr << "--- CPU start ---\n";
+		LinearRegressionGPU lGPU;
+		MatrixGPU XGPU(3, 2);
+		XGPU.setElement(0, 0, 1), XGPU.setElement(0, 1, 1);
+		XGPU.setElement(1, 0, 1), XGPU.setElement(1, 1, 2);
+		XGPU.setElement(2, 0, 2), XGPU.setElement(2, 1, 1);
+		std::vector<double> yGPU = {6, 9, 8};
+
+		std::cerr << "--- GPU start ---\n";
 		MEASURE_TIME_START
-		l.fit(X, y);
-		double mse = l.meanSquaredError(X, y);
+		lGPU.fit(XGPU, yGPU);
+		double mseGPU = lGPU.meanSquaredError(XGPU, yGPU);
 		MEASURE_TIME_END
-		return (mse < 1e-2);
+		return (mseGPU < 1e-2);
 	}
 	bool test2()
 	{
-		LinearRegression l;
-		Matrix X(3, 3);
-		X.setElement(0, 0, 1), X.setElement(0, 1, 1), X.setElement(0, 2, 1);
-		X.setElement(1, 0, 1), X.setElement(1, 1, 2), X.setElement(1, 2, 3);
-		X.setElement(2, 0, 2), X.setElement(2, 1, 1), X.setElement(2, 2, 10);
-		std::vector<double> y = {10, 21, 48};
-		std::cerr << "--- CPU start ---\n";
+		LinearRegressionGPU lGPU;
+		MatrixGPU XGPU(3, 2);
+		XGPU.setElement(0, 0, 1), XGPU.setElement(0, 1, 1), XGPU.setElement(0, 2, 1);
+		XGPU.setElement(1, 0, 1), XGPU.setElement(1, 1, 2), XGPU.setElement(1, 2, 3);
+		XGPU.setElement(2, 0, 2), XGPU.setElement(2, 1, 1), XGPU.setElement(2, 2, 10);
+		std::vector<double> yGPU = {10, 21, 48};
+
+		std::cerr << "--- GPU start ---\n";
 		MEASURE_TIME_START
-		l.fit(X, y);
-		double mse = l.meanSquaredError(X, y);
+		lGPU.fit(XGPU, yGPU);
+		double mseGPU = lGPU.meanSquaredError(XGPU, yGPU);
 		MEASURE_TIME_END
-		return (mse < 1e-2);
+		return (mseGPU < 1e-2);
 
 	}
-	bool test(int N, int D)
-	{
-		LinearRegression l;
-		Matrix X(N, D);		
-		std::vector<double> y, weights;
-		genDataset(N, D, X, y, weights);
-		
-		std::cerr << "--- CPU start ---\n";
-		std::cerr << N << " " << D << "\n";
-		MEASURE_TIME_START
-		l.fit(X, y);
-		double mse = l.meanSquaredError(X, y);
-		MEASURE_TIME_END
-		return (mse < 1e-2);
-
-	}
-
 #define TEST(X, a, b) if(X(a, b)) \
 std::cerr << #X << ": \033[32;1;4mPASS\033[0m" << std::endl; \
 else \
@@ -97,7 +99,7 @@ std::cerr << #X << ": \033[31;1;4mFAIL\033[0m" << std::endl; \
 		// TEST(test, 100, 100);
 		// TEST(test, 1000, 100);
 		// TEST(test, 10000, 100);
-		TEST(test, 100000, 1000);
+		TEST(test, 50000, 500);
 	}
 #undef TEST
 };
