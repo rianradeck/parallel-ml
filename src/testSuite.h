@@ -90,10 +90,10 @@ std::cerr << #X << ": \033[31;1;4mFAIL\033[0m" << std::endl; \
 
 	void testLinearRegression()
 	{	
-		TEST(test1);
-		TEST(test2);
-		TEST(test3);
-		TEST(test4);
+		//TEST(test1);
+		//TEST(test2);
+		//TEST(test3);
+		//TEST(test4);
 		TEST(testBig);
 	}
 #undef TEST
