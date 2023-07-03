@@ -79,9 +79,14 @@ struct Matrix{
 
 
         double *d_A, *d_B, *d_C;
+        
+        auto t = std::chrono::high_resolution_clock::now();
         cudaMalloc((void **) &d_A, sizeof(double) * size);
         cudaMalloc((void **) &d_B, sizeof(double) * o.size);
         cudaMalloc((void **) &d_C, sizeof(double) * ret.size);
+        auto t1 = std::chrono::high_resolution_clock::now();
+        auto d1 = t1 - t;
+        // std::cerr << "Time to allocate memory on device: " << d1.count() / 1e9 << std::endl;
 
         cudaMemcpy(d_A, matrix, sizeof(double) * size, cudaMemcpyHostToDevice);
         cudaMemcpy(d_B, o.matrix, sizeof(double) * o.size, cudaMemcpyHostToDevice);
