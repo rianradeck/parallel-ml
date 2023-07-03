@@ -44,12 +44,17 @@ struct Matrix{
     }
 
     int getIndex(int a, int b) const {
+		//Row major
         return a * col + b;
     }
 
     double getElement(int i, int j) const {
         return matrix[getIndex(i, j)];
     }
+
+	void setElement(int i, int j, double val) {
+		matrix[getIndex(i, j)] = val;
+	}
 
     Matrix operator*(const Matrix& o) const {
         Matrix ret(row, o.col);
@@ -108,6 +113,7 @@ std::istream& operator>>(std::istream& is, Matrix& o)
     }
     return is;
 }
+
 
 void multBlock(int block, Matrix A, Matrix B){
     int retSize = A.row * B.col;
