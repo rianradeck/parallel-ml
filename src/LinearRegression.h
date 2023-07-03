@@ -3,6 +3,8 @@
 
 #include "Matrix.h"
 
+#define MULTOPERATOR *
+
 struct LinearRegression
 {
 	double learningRate = 0.01;
@@ -18,7 +20,7 @@ struct LinearRegression
 	std::vector<double> predict(const Matrix &X)
 	{
 		assert(X.col == weights.row);
-		Matrix ret2 = X * weights;
+		Matrix ret2 = X MULTOPERATOR weights;
 		std::vector<double> ret(X.row);
 		for(size_t i = 0; i < X.row; ++i)
 			ret[i] = ret2.getElement(i, 0) + bias;
@@ -43,16 +45,15 @@ struct LinearRegression
 		std::vector<double> ret(weights.row + 1);	
 		std::vector<double> predicted = predict(X);
 		for(std::size_t i = 0; i < X.row; ++i)
-		{
 			ret[0] += 2.0 / X.row * (predicted[i] - y[i]);
-		}
 		
 		Matrix aux(1, predicted.size());
 		for(std::size_t i = 0; i < aux.col; ++i)
 			aux.setElement(0, i, predicted[i] - y[i]);
 			
-		Matrix grad = aux * X;
+		Matrix grad = aux MULTOPERATOR X;
 
+		#pragma omp parallel for
 		for(std::size_t i = 1; i < ret.size(); ++i)
 			ret[i] = grad.getElement(0, i - 1) * 2.0 / X.row;
 
@@ -72,13 +73,13 @@ struct LinearRegression
 		{
 			std::vector<double> gradient = computeGradient(X, y);
 			bias -= learningRate * gradient[0];
+			#pragma omp parallel for
 			for(std::size_t i = 0; i < weights.row; ++i)
 			{
 				double aux = weights.getElement(i, 0);
 				weights.setElement(i, 0, aux - learningRate * gradient[i + 1]);
 			}
 		}
-
 	}
 };
 

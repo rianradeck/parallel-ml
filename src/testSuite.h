@@ -76,9 +76,9 @@ namespace testSuite
 	bool testBig()
 	{
 		LinearRegression l;
-		Matrix X(1000, 10);
+		Matrix X(1000, 100);
 		std::vector<double> y, weights;
-		genDataset(1000, 10, X, y, weights);
+		genDataset(1000, 100, X, y, weights);
 		l.fit(X, y);
 		double mse = l.meanSquaredError(X, y);
 		return mse < 1e-2;
@@ -90,10 +90,10 @@ std::cerr << #X << ": \033[31;1;4mFAIL\033[0m" << std::endl; \
 
 	void testLinearRegression()
 	{	
-		//TEST(test1);
-		//TEST(test2);
-		//TEST(test3);
-		//TEST(test4);
+		// TEST(test1);
+		// TEST(test2);
+		// TEST(test3);
+		// TEST(test4);
 		TEST(testBig);
 	}
 #undef TEST

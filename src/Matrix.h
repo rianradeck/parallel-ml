@@ -1,5 +1,6 @@
 #include <thread>
 #include <utility>
+#include <omp.h>
 
 const int NUM_TREADS = 4;
 const int MAXN = 100100;
@@ -81,14 +82,18 @@ struct Matrix{
             return ret;
         }
 
-        std::thread t[NUM_TREADS];
-        for(int i = 0;i < NUM_TREADS;i++)
-            t[i] = std::thread(multBlock, i, *this, o);
-        for(int i = 0;i < NUM_TREADS;i++)
-            t[i].join();
+        #pragma omp parallel for
+        for(int idx = 0;idx < ret.size;idx++){
+            int i, j;
+            i = idx / o.col, j = idx % o.col;
 
-        for(int i = 0;i < ret.size;i++)
-            ret.matrix[i] = globalDoubleArr[i];
+            double sum = 0;
+            for(int k = 0;k < col;k++)
+                sum += getElement(i, k) * o.getElement(k, j);
+
+            ret.matrix[i * o.col + j] = sum;
+        }
+
         return ret;
     }
 };
