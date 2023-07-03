@@ -1,7 +1,13 @@
+extension := 
+
+ifeq ($(os), windows_nt)
+	extension := .exe
+endif
+
 .PHONY: run
 
-run: code.exe
-	./code.exe
+run: code$(extension)
+	./code$(extension)
 
-code.exe: src/code.cpp
-	g++ -fopenmp -o code ./src/code.cpp
+code$(extension): src/code.cpp
+	g++ -std=gnu++17 -fopenmp -o code$(extension) ./src/code.cpp
