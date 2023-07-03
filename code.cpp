@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
+#include <iostream>
 #include "Matrix.h"
 
 using namespace std;
@@ -8,6 +8,6 @@ int main(){
     Matrix B(3, 2);
     cin >> A >> B;
     cout << A << "\n" << B << "\n";
-    Matrix C = A * B;
+    Matrix C = A % B;
     cout << C;
 }
