@@ -1,6 +1,7 @@
 #include "LinearRegression.h"
 #include <random>
 #include <iostream>
+#include <chrono>
 
 namespace testSuite
 {
@@ -90,11 +91,27 @@ std::cerr << #X << ": \033[31;1;4mFAIL\033[0m" << std::endl; \
 
 	void testLinearRegression()
 	{	
-		// TEST(test1);
-		// TEST(test2);
-		// TEST(test3);
-		// TEST(test4);
+		auto t = std::chrono::high_resolution_clock::now();
+		TEST(test1);
+		auto t1 = std::chrono::high_resolution_clock::now();
+		auto d1 = t1 - t;
+		std::cerr << d1.count() / 1e9 << std::endl;
+		TEST(test2);
+		auto t2 = std::chrono::high_resolution_clock::now();
+		auto d2 = t2 - t1;
+		std::cerr << d2.count() / 1e9 << std::endl;
+		TEST(test3);
+		auto t3 = std::chrono::high_resolution_clock::now();
+		auto d3 = t3 - t2;
+		std::cerr << d3.count() / 1e9 << std::endl;
+		TEST(test4);
+		auto t4 = std::chrono::high_resolution_clock::now();
+		auto d4 = t4 - t3;
+		std::cerr << d4.count() / 1e9 << std::endl;
 		TEST(testBig);
+		auto t5 = std::chrono::high_resolution_clock::now();
+		auto d5 = t5 - t4;
+		std::cerr << d5.count() / 1e9 << std::endl;
 	}
 #undef TEST
 };

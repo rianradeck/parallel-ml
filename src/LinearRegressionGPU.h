@@ -1,7 +1,7 @@
 #include <vector>
 #include <cassert>
 
-#include "Matrix.h"
+#include "MatrixGPU.h"
 
 #define MULTOPERATOR %
 
