@@ -6,7 +6,7 @@
 using namespace std;
 
 int main(){
-	testSuite::testLinearRegression();/////////
+	testSuite::testLinearRegression();////////////////
     // Matrix A(3, 2, 1);
     // Matrix B(2, 3, 2);
     // cin >> A >> B;

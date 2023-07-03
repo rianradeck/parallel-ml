@@ -1,33 +1,33 @@
 #include <vector>
 #include <cassert>
-
+#include <omp.h>
 #include "MatrixGPU.h"
 
 #define MULTOPERATOR %
 
-struct LinearRegression
+struct LinearRegressionGPU
 {
 	double learningRate = 0.01;
 	double bias = 0;
-	Matrix weights;
-	int maxIter = 4000;
+	MatrixGPU weights;
+	int maxIter = 10000;
 
-	LinearRegression()
+	LinearRegressionGPU()
 	{
-		weights = Matrix(1, 1);
+		weights = MatrixGPU(1, 1);
 	}
 	
-	std::vector<double> predict(const Matrix &X)
+	std::vector<double> predict(const MatrixGPU &X)
 	{
 		assert(X.col == weights.row);
-		Matrix ret2 = X MULTOPERATOR weights;
+		MatrixGPU ret2 = X MULTOPERATOR weights;
 		std::vector<double> ret(X.row);
 		for(size_t i = 0; i < X.row; ++i)
 			ret[i] = ret2.getElement(i, 0) + bias;
 		return ret;
 	}
 
-	double meanSquaredError(const Matrix &X, const std::vector<double> &y)
+	double meanSquaredError(const MatrixGPU &X, const std::vector<double> &y)
 	{
 		assert(X.row == y.size());
 		double ret = 0;
@@ -40,18 +40,18 @@ struct LinearRegression
 		return ret;
 	}
 
-	std::vector<double> computeGradient(const Matrix &X, const std::vector<double> &y)
+	std::vector<double> computeGradient(const MatrixGPU &X, const std::vector<double> &y)
 	{
 		std::vector<double> ret(weights.row + 1);	
 		std::vector<double> predicted = predict(X);
 		for(std::size_t i = 0; i < X.row; ++i)
 			ret[0] += 2.0 / X.row * (predicted[i] - y[i]);
 		
-		Matrix aux(1, predicted.size());
+		MatrixGPU aux(1, predicted.size());
 		for(std::size_t i = 0; i < aux.col; ++i)
 			aux.setElement(0, i, predicted[i] - y[i]);
 			
-		Matrix grad = aux MULTOPERATOR X;
+		MatrixGPU grad = aux MULTOPERATOR X;
 
 		#pragma omp parallel for
 		for(std::size_t i = 1; i < ret.size(); ++i)
@@ -63,11 +63,11 @@ struct LinearRegression
 	//X is a n-d matrix with features
 	//n samples, and each sample is a d-dimensional point
 	//y is the labels 
-	void fit(const Matrix &X, const std::vector<double> &y)
+	void fit(const MatrixGPU &X, const std::vector<double> &y)
 	{
 		assert(X.row == y.size());
 
-		weights = Matrix(X.col, 1);
+		weights = MatrixGPU(X.col, 1);
 
 		for(int currentIter = 0; currentIter < maxIter; currentIter++)
 		{

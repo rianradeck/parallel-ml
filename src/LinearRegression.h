@@ -1,6 +1,6 @@
 #include <vector>
 #include <cassert>
-
+#include <omp.h>
 #include "Matrix.h"
 
 #define MULTOPERATOR %
@@ -10,7 +10,7 @@ struct LinearRegression
 	double learningRate = 0.01;
 	double bias = 0;
 	Matrix weights;
-	int maxIter = 4000;
+	int maxIter = 10000;
 
 	LinearRegression()
 	{

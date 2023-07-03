@@ -2,16 +2,16 @@
 #include <utility>
 
 
-struct Matrix;
+struct MatrixGPU;
 __global__ void multBlock(double *C, double *A, double *B, int Arow, int Acol, int Brow, int Bcol, int size);
-std::ostream& operator<<(std::ostream& os, Matrix& o);
+std::ostream& operator<<(std::ostream& os, MatrixGPU& o);
 
-struct Matrix{
+struct MatrixGPU{
 
     int row, col, size;
     double *matrix;
 
-    Matrix(int row_, int col_, double init = 0) : row(row_), col(col_) {
+    MatrixGPU(int row_, int col_, double init = 0) : row(row_), col(col_) {
         matrix = new double[row * col];
         size = row * col;
         for(int i = 0;i < row;i++)
@@ -19,7 +19,7 @@ struct Matrix{
                 matrix[getIndex(i, j)] = init;
     }
 
-    Matrix(const Matrix &o) {
+    MatrixGPU(const MatrixGPU &o) {
         row = o.row;
         col = o.col;
         size = o.col * o.row;
@@ -29,9 +29,9 @@ struct Matrix{
                 matrix[getIndex(i, j)] = o.matrix[getIndex(i, j)];
     }
 
-    Matrix(){}
+    MatrixGPU(){}
 
-    /*~Matrix(){
+    /*~MatrixGPU(){
         delete[] matrix;
     }*/
 
@@ -52,8 +52,8 @@ struct Matrix{
 		matrix[getIndex(i, j)] = val;
 	}
 
-    Matrix operator*(const Matrix& o) const {
-        Matrix ret(row, o.col);
+    MatrixGPU operator*(const MatrixGPU& o) const {
+        MatrixGPU ret(row, o.col);
         if(col != o.row){
             std::cerr << "YOU CANNOT MULTIPLY THESE MATRICES!\n";
             return ret;
@@ -70,8 +70,8 @@ struct Matrix{
         return ret;
     }
 
-    Matrix operator%(const Matrix& o) const {
-        Matrix ret(row, o.col);
+    MatrixGPU operator%(const MatrixGPU& o) const {
+        MatrixGPU ret(row, o.col);
         if(col != o.row){
             std::cerr << "YOU CANNOT MULTIPLY THESE MATRICES!\n";
             return ret;
@@ -109,7 +109,7 @@ struct Matrix{
     }
 };
 
-std::ostream& operator<<(std::ostream& os, Matrix& o){
+std::ostream& operator<<(std::ostream& os, MatrixGPU& o){
     for(int i = 0;i < o.row;i++){
         for(int j = 0;j < o.col;j++)
             os << o.getElement(i, j) << " ";
@@ -118,7 +118,7 @@ std::ostream& operator<<(std::ostream& os, Matrix& o){
     return os;
 }
 
-std::istream& operator>>(std::istream& is, Matrix& o)
+std::istream& operator>>(std::istream& is, MatrixGPU& o)
 {
     for(int i = 0;i < o.row;i++){
         for(int j = 0;j < o.col;j++){
