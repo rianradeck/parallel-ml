@@ -6,20 +6,22 @@
 struct LinearRegression
 {
 	double learningRate = 0.01;
-	std::vector<double> weights;
-	int maxIter = 100000;
+	double bias = 0;
+	Matrix weights;
+	int maxIter = 4000;
+
+	LinearRegression()
+	{
+		weights = Matrix(1, 1);
+	}
 	
 	std::vector<double> predict(const Matrix &X)
 	{
-		assert(X.col + 1 == weights.size());
+		assert(X.col == weights.row);
+		Matrix ret2 = X % weights;
 		std::vector<double> ret(X.row);
-		for(size_t i = 0; i < ret.size(); ++i)
-		{
-			double acc = weights[0];
-			for(std::size_t j = 1; j < weights.size(); ++j)
-				acc += weights[j] * X.getElement(i, j - 1);
-			ret[i] = acc;
-		}
+		for(size_t i = 0; i < X.row; ++i)
+			ret[i] = ret2.getElement(i, 0) + bias;
 		return ret;
 	}
 
@@ -38,20 +40,21 @@ struct LinearRegression
 
 	std::vector<double> computeGradient(const Matrix &X, const std::vector<double> &y)
 	{
-		std::vector<double> ret(weights.size());	
+		std::vector<double> ret(weights.row + 1);	
 		std::vector<double> predicted = predict(X);
 		for(std::size_t i = 0; i < X.row; ++i)
 		{
 			ret[0] += 2.0 / X.row * (predicted[i] - y[i]);
 		}
+		
+		Matrix aux(1, predicted.size());
+		for(std::size_t i = 0; i < aux.col; ++i)
+			aux.setElement(0, i, predicted[i] - y[i]);
 			
+		Matrix grad = aux % X;
+
 		for(std::size_t i = 1; i < ret.size(); ++i)
-		{
-			for(std::size_t j = 0; j < X.row; ++j)
-			{
-				ret[i] += 2.0 / X.row * X.getElement(j, i - 1) * (predicted[j] - y[j]);
-			}
-		}
+			ret[i] = grad.getElement(0, i - 1) * 2.0 / X.row;
 
 		return ret;
 	}
@@ -63,14 +66,19 @@ struct LinearRegression
 	{
 		assert(X.row == y.size());
 
-		weights.resize(X.col + 1);
+		weights = Matrix(X.col, 1);
 
 		for(int currentIter = 0; currentIter < maxIter; currentIter++)
 		{
 			std::vector<double> gradient = computeGradient(X, y);
-			for(std::size_t i = 0; i < weights.size(); ++i)
-				weights[i] -= learningRate * gradient[i];
+			bias -= learningRate * gradient[0];
+			for(std::size_t i = 0; i < weights.row; ++i)
+			{
+				double aux = weights.getElement(i, 0);
+				weights.setElement(i, 0, aux - learningRate * gradient[i + 1]);
+			}
 		}
+
 	}
 };
 

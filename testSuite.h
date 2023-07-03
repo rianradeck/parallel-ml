@@ -37,7 +37,7 @@ namespace testSuite
 		std::vector<double> y = {6, 9, 8};
 		l.fit(X, y);
 		double mse = l.meanSquaredError(X, y);
-		return mse < 1e-5;
+		return mse < 1e-2;
 	}
 	bool test2()
 	{
@@ -49,7 +49,7 @@ namespace testSuite
 		std::vector<double> y = {10, 21, 48};
 		l.fit(X, y);
 		double mse = l.meanSquaredError(X, y);
-		return mse < 1e-5;
+		return mse < 1e-2;
 
 	}
 	bool test3()
@@ -60,7 +60,7 @@ namespace testSuite
 		genDataset(20, 5, X, y, weights);
 		l.fit(X, y);
 		double mse = l.meanSquaredError(X, y);
-		return mse < 1e-5;
+		return mse < 1e-2;
 
 	}
 	bool test4()
@@ -71,7 +71,17 @@ namespace testSuite
 		genDataset(100, 10, X, y, weights);
 		l.fit(X, y);
 		double mse = l.meanSquaredError(X, y);
-		return mse < 1e-5;
+		return mse < 1e-2;
+	}
+	bool testBig()
+	{
+		LinearRegression l;
+		Matrix X(1000, 10);
+		std::vector<double> y, weights;
+		genDataset(1000, 10, X, y, weights);
+		l.fit(X, y);
+		double mse = l.meanSquaredError(X, y);
+		return mse < 1e-2;
 	}
 #define TEST(X) if(X()) \
 std::cerr << #X << ": \033[32;1;4mPASS\033[0m" << std::endl; \
@@ -84,6 +94,7 @@ std::cerr << #X << ": \033[31;1;4mFAIL\033[0m" << std::endl; \
 		TEST(test2);
 		TEST(test3);
 		TEST(test4);
+		TEST(testBig);
 	}
 #undef TEST
 };

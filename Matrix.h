@@ -35,9 +35,9 @@ struct Matrix{
 
     Matrix(){}
 
-    ~Matrix(){
+    /*~Matrix(){
         delete[] matrix;
-    }
+    }*/
 
     std::pair<int, int> getIndex(int idx){
         return {idx / col, idx % col};
