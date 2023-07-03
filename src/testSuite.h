@@ -113,15 +113,15 @@ namespace testSuite
 	}
 	bool test3()
 	{
+		int N = 20, D = 5;
 		LinearRegression l;
-		Matrix X(20, 5);
+		Matrix X(N, D);
 		LinearRegressionGPU lGPU;
-		MatrixGPU XGPU(20, 5);
+		MatrixGPU XGPU(N, D);
 		std::vector<double> y, weights;
 		std::vector<double> yGPU, weightsGPU;
-		genDataset(20, 5, X, y, weights);
-		genDataset(20, 5, XGPU, yGPU, weightsGPU);
-
+		genDataset(N, D, X, y, weights);
+		genDataset(N, D, XGPU, yGPU, weightsGPU);
 		std::cerr << "--- CPU start ---\n";
 		MEASURE_TIME_START
 		l.fit(X, y);
@@ -137,14 +137,87 @@ namespace testSuite
 	}
 	bool test4()
 	{
+		int N = 100, D = 10;
 		LinearRegression l;
-		Matrix X(100, 10);
+		Matrix X(N, D);
 		LinearRegressionGPU lGPU;
-		MatrixGPU XGPU(100, 10);
+		MatrixGPU XGPU(N, D);
 		std::vector<double> y, weights;
 		std::vector<double> yGPU, weightsGPU;
-		genDataset(100, 10, X, y, weights);
-		genDataset(100, 10, XGPU, yGPU, weightsGPU);
+		genDataset(N, D, X, y, weights);
+		genDataset(N, D, XGPU, yGPU, weightsGPU);
+
+		std::cerr << "--- CPU start ---\n";
+		MEASURE_TIME_START
+		l.fit(X, y);
+		double mse = l.meanSquaredError(X, y);
+		MEASURE_TIME_END
+		std::cerr << "--- GPU start ---\n";
+		MEASURE_TIME_START
+		lGPU.fit(XGPU, yGPU);
+		double mseGPU = lGPU.meanSquaredError(XGPU, yGPU);
+		MEASURE_TIME_END
+		return mse < 1e-2 and mseGPU < 1e-2;
+	}
+	bool test5()
+	{
+		int N = 1000, D = 10;
+		LinearRegression l;
+		Matrix X(N, D);
+		LinearRegressionGPU lGPU;
+		MatrixGPU XGPU(N, D);
+		std::vector<double> y, weights;
+		std::vector<double> yGPU, weightsGPU;
+		genDataset(N, D, X, y, weights);
+		genDataset(N, D, XGPU, yGPU, weightsGPU);
+
+		std::cerr << "--- CPU start ---\n";
+		MEASURE_TIME_START
+		l.fit(X, y);
+		double mse = l.meanSquaredError(X, y);
+		MEASURE_TIME_END
+		std::cerr << "--- GPU start ---\n";
+		MEASURE_TIME_START
+		lGPU.fit(XGPU, yGPU);
+		double mseGPU = lGPU.meanSquaredError(XGPU, yGPU);
+		MEASURE_TIME_END
+		return mse < 1e-2 and mseGPU < 1e-2;
+	}
+	bool test6()
+	{
+		int N = 100, D = 100;
+		LinearRegression l;
+		Matrix X(N, D);
+		LinearRegressionGPU lGPU;
+		MatrixGPU XGPU(N, D);
+		std::vector<double> y, weights;
+		std::vector<double> yGPU, weightsGPU;
+		genDataset(N, D, X, y, weights);
+		genDataset(N, D, XGPU, yGPU, weightsGPU);
+
+		std::cerr << "--- CPU start ---\n";
+		MEASURE_TIME_START
+		l.fit(X, y);
+		double mse = l.meanSquaredError(X, y);
+		MEASURE_TIME_END
+		std::cerr << "--- GPU start ---\n";
+		MEASURE_TIME_START
+		lGPU.fit(XGPU, yGPU);
+		double mseGPU = lGPU.meanSquaredError(XGPU, yGPU);
+		MEASURE_TIME_END
+		return mse < 1e-2 and mseGPU < 1e-2;
+	}
+	bool test7()
+	{
+		int N = 1000, D = 100;
+		LinearRegression l;
+		Matrix X(N, D);
+		LinearRegressionGPU lGPU;
+		MatrixGPU XGPU(N, D);
+		std::vector<double> y, weights;
+		std::vector<double> yGPU, weightsGPU;
+		genDataset(N, D, X, y, weights);
+		genDataset(N, D, XGPU, yGPU, weightsGPU);
 
 		std::cerr << "--- CPU start ---\n";
 		MEASURE_TIME_START
@@ -160,14 +233,15 @@ namespace testSuite
 	}
 	bool testBig()
 	{	
+		int N = 10000, D = 100;
 		LinearRegression l;
-		Matrix X(10000, 100);
+		Matrix X(N, D);
 		LinearRegressionGPU lGPU;
-		MatrixGPU XGPU(10000, 100);
+		MatrixGPU XGPU(N, D);
 		std::vector<double> y, weights;
 		std::vector<double> yGPU, weightsGPU;
-		genDataset(10000, 100, X, y, weights);
-		genDataset(10000, 100, XGPU, yGPU, weightsGPU);
+		genDataset(N, D, X, y, weights);
+		genDataset(N, D, XGPU, yGPU, weightsGPU);
 
 		std::cerr << "--- CPU start ---\n";
 		MEASURE_TIME_START
@@ -188,27 +262,14 @@ std::cerr << #X << ": \033[31;1;4mFAIL\033[0m" << std::endl; \
 
 	void testLinearRegression()
 	{	
-		// auto t = std::chrono::high_resolution_clock::now();
 		TEST(test1);
-		// auto t1 = std::chrono::high_resolution_clock::now();
-		// auto d1 = t1 - t;
-		// std::cerr << d1.count() / 1e9 << std::endl;
 		TEST(test2);
-		// auto t2 = std::chrono::high_resolution_clock::now();
-		// auto d2 = t2 - t1;
-		// std::cerr << d2.count() / 1e9 << std::endl;
 		TEST(test3);
-		// auto t3 = std::chrono::high_resolution_clock::now();
-		// auto d3 = t3 - t2;
-		// std::cerr << d3.count() / 1e9 << std::endl;
 		TEST(test4);
-		// auto t4 = std::chrono::high_resolution_clock::now();
-		// auto d4 = t4 - t3;
-		// std::cerr << d4.count() / 1e9 << std::endl;
+		TEST(test5);
+		TEST(test6);
+		TEST(test7);
 		TEST(testBig);
-		// auto t5 = std::chrono::high_resolution_clock::now();
-		// auto d5 = t5 - t4;
-		// std::cerr << d5.count() / 1e9 << std::endl;
 	}
 #undef TEST
 };
