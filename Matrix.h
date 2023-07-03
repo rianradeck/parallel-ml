@@ -29,12 +29,17 @@ struct Matrix{
     }
 
     int getIndex(int a, int b) const {
+		//Row major
         return a * col + b;
     }
 
     double getElement(int i, int j) const {
         return matrix[getIndex(i, j)];
     }
+
+	void setElement(int i, int j, double val) {
+		matrix[getIndex(i, j)] = val;
+	}
 
     Matrix operator*(const Matrix& o) const {
         Matrix ret(row, o.col);
@@ -54,32 +59,6 @@ struct Matrix{
         return ret;
     }
 
-
-
-    Matrix operator%(const Matrix& o) const {
-        Matrix ret(row, o.col);
-        if(col != o.row){
-            std::cerr << "YOU CANNOT MULTIPLY THESE MATRICES!\n";
-            return ret;
-        }
-
-
-        int NUM_TREADS = 4;
-        std::thread t[NUM_TREADS];
-
-        for(int i = 0;i < NUM_TREADS;i++){
-            t[i] = std::thread(multBlock, i, &ret, *this, o);
-            cout << "Spawned thread " << i << "\n";
-        }
-        for(int i = 0;i < NUM_TREADS;i++){
-            dbg(i);
-            t[i].join();
-            cout << "Joined " << i << "\n";
-        }
-
-        cout << ret << "\n";
-        return ret;
-    }
 };
 
 std::ostream& operator<<(std::ostream& os, Matrix& o){
@@ -103,19 +82,3 @@ std::istream& operator>>(std::istream& is, Matrix& o)
     return is;
 }
 
-void multBlock(int block, Matrix *ret, const Matrix &A, const Matrix& B){
-
-    int blockSize = (ret->size + NUM_TREADS - 1) / NUM_TREADS;
-    int start = block * blockSize;
-    int finish = std::min(start + blockSize, ret->size); 
-
-    for(int idx = start;idx < finish;idx++){
-        int i, j;
-        std::tie(i, j) = ret->getIndex(idx);
-
-        double sum = 0;
-        for(int k = 0;k < A.col;k++)
-            sum += A.getElement(i, k) * B.getElement(k, j);
-        ret->matrix[ret->getIndex(i, j)] = sum;
-    }
-}
